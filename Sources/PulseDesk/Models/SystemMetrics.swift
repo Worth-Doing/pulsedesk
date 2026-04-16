@@ -12,6 +12,8 @@ struct CPUMetrics: Sendable {
     var loadAverage: [Double] = [0, 0, 0]
     var perCoreUsage: [Double] = []
     var history: [Double] = []
+    var userHistory: [Double] = []
+    var systemHistory: [Double] = []
 }
 
 // MARK: - Memory Metrics

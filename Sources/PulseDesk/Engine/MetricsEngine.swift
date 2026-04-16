@@ -22,7 +22,7 @@ final class MetricsEngine: ObservableObject {
     private var lastHighFreqUpdate: Date?
     private var lastLowFreqUpdate: Date?
 
-    static let maxHistoryPoints = 120
+    var maxHistorySize = 120
 
     init() {
         startMonitoring()
@@ -123,6 +123,8 @@ final class MetricsEngine: ObservableObject {
 
         // History
         appendHistory(&cpu.history, value: cpu.totalUsage)
+        appendHistory(&cpu.userHistory, value: cpu.userUsage)
+        appendHistory(&cpu.systemHistory, value: cpu.systemUsage)
     }
 
     private func updatePerCoreCPU() {
@@ -349,9 +351,41 @@ final class MetricsEngine: ObservableObject {
 
     // MARK: - Helpers
 
+    // MARK: - Configurable Intervals
+
+    func updateIntervals(highFreq: Double, lowFreq: Double) {
+        stopMonitoring()
+
+        updateCPU()
+        updateMemory()
+        updateDisk(elapsed: 1.0)
+        updateNetwork(elapsed: 1.0)
+        updateGPU()
+        updateUptime()
+
+        highFreqTimer = Timer.scheduledTimer(withTimeInterval: highFreq, repeats: true) { [weak self] _ in
+            guard let self = self else { return }
+            self.updateCPU()
+            self.updateMemory()
+        }
+
+        lowFreqTimer = Timer.scheduledTimer(withTimeInterval: lowFreq, repeats: true) { [weak self] _ in
+            guard let self = self else { return }
+            let now = Date()
+            let elapsed = self.lastLowFreqUpdate.map { now.timeIntervalSince($0) } ?? lowFreq
+            self.lastLowFreqUpdate = now
+            self.updateDisk(elapsed: elapsed)
+            self.updateNetwork(elapsed: elapsed)
+            self.updateGPU()
+            self.updateUptime()
+        }
+    }
+
+    // MARK: - Helpers
+
     private func appendHistory(_ history: inout [Double], value: Double) {
         history.append(value)
-        if history.count > Self.maxHistoryPoints {
+        if history.count > maxHistorySize {
             history.removeFirst()
         }
     }

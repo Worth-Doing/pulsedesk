@@ -31,6 +31,13 @@ final class ThermalEngine: ObservableObject {
         timer = nil
     }
 
+    func updateInterval(_ interval: Double) {
+        timer?.invalidate()
+        timer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { [weak self] _ in
+            self?.updateThermal()
+        }
+    }
+
     private func updateThermal() {
         // Get thermal state from ProcessInfo
         let state = ProcessInfo.processInfo.thermalState

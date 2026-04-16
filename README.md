@@ -20,8 +20,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Worth-Doing/pulsedesk/releases/latest/download/PulseDesk-1.0.0.dmg">
-    <img src="https://img.shields.io/badge/Download-PulseDesk%201.0.0%20DMG-4080ff?style=for-the-badge&logo=apple&logoColor=white" alt="Download DMG"/>
+  <a href="https://github.com/Worth-Doing/pulsedesk/releases/latest/download/PulseDesk-2.0.0.dmg">
+    <img src="https://img.shields.io/badge/Download-PulseDesk%202.0.0%20DMG-4080ff?style=for-the-badge&logo=apple&logoColor=white" alt="Download DMG"/>
   </a>
 </p>
 
@@ -37,29 +37,88 @@ This is not a passive monitoring tool. PulseDesk is an **active system control l
   <img src="https://img.shields.io/badge/Real--Time-Monitoring-4080ff?style=flat-square" alt="Real-Time"/>
   <img src="https://img.shields.io/badge/Process-Control-9060ff?style=flat-square" alt="Process Control"/>
   <img src="https://img.shields.io/badge/One--Click-Boost-22c55e?style=flat-square" alt="Boost"/>
+  <img src="https://img.shields.io/badge/Desktop-Widgets-ff9020?style=flat-square" alt="Widgets"/>
+  <img src="https://img.shields.io/badge/Storage-Analysis-9060ff?style=flat-square" alt="Storage"/>
   <img src="https://img.shields.io/badge/Smart-Suggestions-ff9020?style=flat-square" alt="Smart"/>
 </p>
 
 ---
 
+## What's New in v2.0.0
+
+PulseDesk 2.0 is a **major upgrade** — the codebase has doubled from 23 to 38 files and 3,400 to 6,700 lines of Swift.
+
+### Multi-Page Navigation
+
+11 dedicated pages organized in a sectioned sidebar:
+
+| Section | Pages |
+|---------|-------|
+| **Overview** | Home dashboard |
+| **Hardware** | CPU, Memory, Storage, Network, GPU, Thermal |
+| **Tools** | Processes, Booster, Desktop Widgets |
+| **System** | Settings |
+
+Every hardware metric now has its own **full-detail page** with large time series charts, stats, and deep breakdowns.
+
+### Desktop Floating Widgets
+
+Pin **real-time metric widgets** directly to your macOS desktop:
+
+- 6 widget types: CPU Gauge, Memory Gauge, Network Speed, Disk Usage, GPU Gauge, System Health
+- Always-on-top, glassmorphic design with dark translucent background
+- Drag to reposition — positions saved between sessions
+- Appear on all desktop spaces
+- Close on hover (X button) or from the management page
+- Persist across app restarts
+
+### Storage Analysis
+
+Full disk analysis engine that scans:
+
+- **Applications** sorted by size (all /Applications)
+- **Home directories** (Desktop, Documents, Downloads, etc.) with item counts
+- **Large files** (>50 MB) with file type icons
+- Disk I/O time series with read/write speeds
+
+### Enhanced Time Series Charts
+
+New `TimeSeriesChart` component with:
+
+- Multi-series support (e.g., User + System + Total CPU on one chart)
+- Color-coded legend with live values
+- Y-axis labels
+- Time axis labels
+- Smooth bezier curves with gradient fill
+
+### Configurable Refresh Interval
+
+From the Settings page, control:
+
+- **Refresh interval**: 0.5s to 10s (slider + preset buttons)
+- **History duration**: 60 to 600 data points
+- Changes apply live to all engines
+
+---
+
 ## Features
 
-### Dashboard — Real-Time System Overview
+### Home Dashboard — System Overview
 
-| Metric | Details | Update Rate |
-|--------|---------|-------------|
-| **CPU** | Total usage, user/system split, per-core heatmap, load average | 1s |
-| **Memory** | Used/free/active/wired/compressed, pressure level, swap | 1s |
-| **Network** | Upload/download speed, total transferred, dual-line graph | 2s |
-| **Disk** | Storage usage ring, read/write I/O speed, I/O history | 2s |
-| **GPU** | Apple Silicon utilization, VRAM usage | 2s |
-| **Thermal** | Thermal state (Normal/Elevated/High/Critical), CPU temperature | 2s |
+The Home page shows **all key metrics at a glance** in a grid of clickable cards. Each card displays the current value, a mini sparkline chart, and key sub-metrics. Click any card to navigate to the full detail page.
 
-Every metric comes with:
-- Live animated graph (120-point history)
-- Trend indicator (up/down/stable)
-- Usage bar with dynamic color coding
-- Quick action access
+### Hardware Detail Pages
+
+Each hardware component has a dedicated detail page:
+
+| Page | Highlights |
+|------|-----------|
+| **CPU** | User/System/Total time series, per-core heatmap with labels, load average bars, processor info |
+| **Memory** | Usage time series, composition breakdown (Active/Wired/Compressed/Inactive/Free) with visual bars, pressure gauge, swap monitoring |
+| **Storage** | Disk I/O time series, app sizes, directory analysis, large file finder |
+| **Network** | Dual-line download/upload time series, throughput bars, transfer totals, peak/average stats |
+| **GPU** | Utilization time series, VRAM ring gauge, min/avg/max distribution |
+| **Thermal** | State timeline visualization, state distribution stats, temperature gauge, recommendations |
 
 ### Process Intelligence
 
@@ -79,17 +138,16 @@ Every metric comes with:
 
 Right-click any process for full control:
 
-| Action | Shortcut | Signal |
-|--------|----------|--------|
-| Terminate | — | `SIGTERM` |
-| Force Kill | — | `SIGKILL` |
-| Suspend | — | `SIGSTOP` |
-| Resume | — | `SIGCONT` |
-| Lower Priority | — | `nice +10` |
-| Raise Priority | — | `nice -5` |
-| Kill Process Tree | — | Recursive `SIGTERM` |
-| Copy PID | — | Clipboard |
-| Copy Name | — | Clipboard |
+| Action | Signal |
+|--------|--------|
+| Terminate | `SIGTERM` |
+| Force Kill | `SIGKILL` |
+| Suspend | `SIGSTOP` |
+| Resume | `SIGCONT` |
+| Lower Priority | `nice +10` |
+| Raise Priority | `nice -5` |
+| Kill Process Tree | Recursive `SIGTERM` |
+| Copy PID / Name | Clipboard |
 
 All actions provide **toast notifications** with success/failure feedback.
 
@@ -111,20 +169,20 @@ One-click performance optimization with three profiles:
 
 Protected processes (Finder, Dock, WindowServer, loginwindow, etc.) are never terminated.
 
-### Smart Suggestions
-
-Rule-based alerts that detect:
-- Runaway processes consuming excessive CPU
-- Critical memory pressure with top consumers
-- Elevated memory warnings
-
 ### Keyboard Shortcuts
 
 | Shortcut | Action |
 |----------|--------|
-| `Cmd + 1` | Switch to Dashboard |
-| `Cmd + 2` | Switch to Processes |
-| `Cmd + 3` | Switch to Booster |
+| `Cmd + 1` | Home |
+| `Cmd + 2` | CPU |
+| `Cmd + 3` | Memory |
+| `Cmd + 4` | Storage |
+| `Cmd + 5` | Network |
+| `Cmd + 6` | GPU |
+| `Cmd + 7` | Thermal |
+| `Cmd + 8` | Processes |
+| `Cmd + 9` | Booster |
+| `Cmd + 0` | Widgets |
 | `Cmd + R` | Refresh process list |
 
 ---
@@ -133,13 +191,14 @@ Rule-based alerts that detect:
 
 ### Glassmorphism UI
 
-PulseDesk uses a modern **glass morphism** design language inspired by iOS 26 and VisionOS:
+PulseDesk uses a modern **glass morphism** design language:
 
 - Ultra-thin material backdrops
 - Depth-layered panels with subtle borders
 - Spring-based animations throughout
 - Hover micro-interactions on every panel
 - Dynamic color coding based on usage levels
+- Dark translucent widgets for desktop overlay
 
 ### Color System
 
@@ -160,36 +219,58 @@ PulseDesk uses a modern **glass morphism** design language inspired by iOS 26 an
 ```
 PulseDesk/
 ├── App/
-│   └── PulseDeskApp.swift              # Entry point, environment injection, menu commands
+│   └── PulseDeskApp.swift                 # Entry point, environment injection, menu commands
 ├── Models/
-│   ├── SystemMetrics.swift             # CPU, Memory, Disk, Network, GPU, Thermal models
-│   ├── ProcessInfo.swift               # Process model, scoring, categories
-│   └── BoosterMode.swift               # Boost levels & results
+│   ├── SystemMetrics.swift                # CPU, Memory, Disk, Network, GPU, Thermal models
+│   ├── ProcessInfo.swift                  # Process model, scoring, categories
+│   ├── BoosterMode.swift                  # Boost levels & results
+│   ├── AppSettings.swift                  # User settings with persistence
+│   ├── StorageInfo.swift                  # App/file/directory storage models
+│   └── WidgetConfig.swift                 # Desktop widget types & configuration
 ├── Engine/
-│   ├── MetricsEngine.swift             # Real-time system metrics (Mach/IOKit)
-│   ├── ProcessEngine.swift             # Process listing, scoring, delta-time CPU
-│   ├── ActionEngine.swift              # Kill/suspend/priority + smart suggestions
-│   ├── ThermalEngine.swift             # Thermal state monitoring
-│   └── NotificationEngine.swift        # Toast notification system
+│   ├── MetricsEngine.swift                # Real-time system metrics (Mach/IOKit)
+│   ├── ProcessEngine.swift                # Process listing, scoring, delta-time CPU
+│   ├── ActionEngine.swift                 # Kill/suspend/priority + smart suggestions
+│   ├── ThermalEngine.swift                # Thermal state monitoring
+│   ├── NotificationEngine.swift           # Toast notification system
+│   ├── StorageEngine.swift                # Disk analysis (apps, files, directories)
+│   └── WidgetEngine.swift                 # Floating desktop widget management (AppKit)
 ├── Views/
-│   ├── ContentView.swift               # Main layout, sidebar, navigation
+│   ├── ContentView.swift                  # Main layout, sectioned sidebar, navigation
+│   ├── Home/
+│   │   └── HomeView.swift                 # Overview dashboard with metric cards
+│   ├── CPU/
+│   │   └── CPUDetailView.swift            # Full CPU detail page
+│   ├── Memory/
+│   │   └── MemoryDetailView.swift         # Full memory detail page
+│   ├── Storage/
+│   │   └── StorageDetailView.swift        # Disk I/O + storage analysis page
+│   ├── Network/
+│   │   └── NetworkDetailView.swift        # Full network detail page
+│   ├── GPU/
+│   │   └── GPUDetailView.swift            # Full GPU detail page
+│   ├── Thermal/
+│   │   └── ThermalDetailView.swift        # Full thermal detail page
+│   ├── Settings/
+│   │   └── SettingsView.swift             # Refresh interval, history, about
+│   ├── Widgets/
+│   │   ├── WidgetsManagerView.swift       # Widget management page
+│   │   └── FloatingWidgetView.swift       # Floating widget views (6 types)
 │   ├── Dashboard/
-│   │   ├── DashboardView.swift         # Dashboard grid + status bar + suggestions
-│   │   ├── CPUPanel.swift              # CPU graph + per-core heatmap
-│   │   ├── MemoryPanel.swift           # Memory composition + pressure
-│   │   ├── NetworkPanel.swift          # Dual upload/download graph
-│   │   ├── DiskPanel.swift             # Usage ring + I/O graph
-│   │   └── GPUPanel.swift              # Apple Silicon GPU metrics
+│   │   ├── DashboardView.swift            # Legacy dashboard grid
+│   │   ├── CPUPanel.swift, MemoryPanel.swift, NetworkPanel.swift
+│   │   ├── DiskPanel.swift, GPUPanel.swift
 │   ├── Process/
-│   │   ├── ProcessListView.swift       # Searchable list + context menus
-│   │   └── ProcessCardView.swift       # Process cards + hover actions
+│   │   ├── ProcessListView.swift          # Searchable list + context menus
+│   │   └── ProcessCardView.swift          # Process cards + hover actions
 │   ├── Booster/
-│   │   └── BoosterView.swift           # Optimization profiles + activation
+│   │   └── BoosterView.swift              # Optimization profiles + activation
 │   └── Components/
-│       ├── LiveGraph.swift             # Bezier curve real-time graphs
-│       └── GlassCard.swift             # Design system components + toasts
+│       ├── LiveGraph.swift                # Bezier curve real-time graphs
+│       ├── TimeSeriesChart.swift          # Enhanced chart with legend/axes
+│       └── GlassCard.swift                # Design system components + toasts
 └── Utils/
-    └── Extensions.swift                # Colors, animations, formatters
+    └── Extensions.swift                   # Colors, animations, formatters
 ```
 
 ### System APIs Used
@@ -205,6 +286,8 @@ PulseDesk/
 | `ifaddrs` | Network interface stats |
 | `ProcessInfo.thermalState` | Thermal monitoring |
 | `sysctl` (`KERN_BOOTTIME`) | System uptime |
+| `FileManager` / `URL` resource values | Storage analysis |
+| `NSPanel` / `NSHostingView` | Floating desktop widgets |
 
 ---
 
@@ -226,8 +309,8 @@ PulseDesk/
 
 ### Download (Recommended)
 
-<a href="https://github.com/Worth-Doing/pulsedesk/releases/latest/download/PulseDesk-1.0.0.dmg">
-  <img src="https://img.shields.io/badge/Download-PulseDesk%201.0.0%20DMG-4080ff?style=for-the-badge&logo=apple&logoColor=white" alt="Download DMG"/>
+<a href="https://github.com/Worth-Doing/pulsedesk/releases/latest/download/PulseDesk-2.0.0.dmg">
+  <img src="https://img.shields.io/badge/Download-PulseDesk%202.0.0%20DMG-4080ff?style=for-the-badge&logo=apple&logoColor=white" alt="Download DMG"/>
 </a>
 
 1. Download the `.dmg` file
@@ -261,13 +344,15 @@ swift build -c release
 
 PulseDesk is designed to be lightweight:
 
-| Metric | Target |
-|--------|--------|
-| CPU Usage | < 3% |
-| Memory | < 40 MB |
-| Binary Size | ~1.5 MB |
-| DMG Size | ~2.3 MB |
-| Launch Time | < 0.5s |
+| Metric | v1.0 | v2.0 |
+|--------|------|------|
+| CPU Usage | < 3% | < 3% |
+| Memory | < 40 MB | < 50 MB |
+| Binary Size | ~1.5 MB | ~3.1 MB |
+| DMG Size | ~2.3 MB | ~2.8 MB |
+| Source Files | 23 | 38 |
+| Lines of Code | ~3,400 | ~6,700 |
+| Launch Time | < 0.5s | < 0.5s |
 
 ---
 
@@ -277,13 +362,16 @@ PulseDesk is designed to be lightweight:
   <img src="https://img.shields.io/badge/Language-Swift-F05138?style=flat-square&logo=swift&logoColor=white" alt="Swift"/>
   <img src="https://img.shields.io/badge/UI-SwiftUI-007AFF?style=flat-square&logo=swift&logoColor=white" alt="SwiftUI"/>
   <img src="https://img.shields.io/badge/Framework-IOKit-333333?style=flat-square&logo=apple&logoColor=white" alt="IOKit"/>
+  <img src="https://img.shields.io/badge/Framework-AppKit-333333?style=flat-square&logo=apple&logoColor=white" alt="AppKit"/>
   <img src="https://img.shields.io/badge/Framework-Combine-333333?style=flat-square&logo=apple&logoColor=white" alt="Combine"/>
   <img src="https://img.shields.io/badge/Build-Swift%20Package%20Manager-F05138?style=flat-square&logo=swift&logoColor=white" alt="SPM"/>
   <img src="https://img.shields.io/badge/Xcode-Not%20Required-22863a?style=flat-square" alt="No Xcode"/>
 </p>
 
-- **Swift only** — no Objective-C, no C bridges
-- **SwiftUI only** — no AppKit views
+- **Swift + SwiftUI** — native macOS UI
+- **AppKit** — floating desktop widget windows (`NSPanel`)
+- **IOKit** — hardware metrics (disk I/O, GPU, thermal)
+- **Combine** — reactive data binding
 - **No Xcode dependency** — builds via `swift build`
 - **No Electron** — pure native macOS
 - **No third-party dependencies** — zero external packages
@@ -292,9 +380,13 @@ PulseDesk is designed to be lightweight:
 
 ## Roadmap
 
-- [ ] Menu bar extra (compact floating widget)
-- [ ] Multi-window support
-- [ ] Settings/preferences panel
+- [x] ~~Settings/preferences panel~~ (v2.0)
+- [x] ~~Multi-page navigation~~ (v2.0)
+- [x] ~~Desktop floating widgets~~ (v2.0)
+- [x] ~~Storage analysis~~ (v2.0)
+- [x] ~~Configurable refresh interval~~ (v2.0)
+- [x] ~~Enhanced time series charts~~ (v2.0)
+- [ ] Menu bar extra (compact menu bar widget)
 - [ ] Metric export (CSV/JSON)
 - [ ] Custom boost profiles
 - [ ] Plugin system
@@ -330,7 +422,7 @@ MIT License — see [LICENSE](LICENSE) for details.
 ---
 
 <p align="center">
-  <strong>PulseDesk</strong> — What Activity Monitor should have been if it was designed in 2026.
+  <strong>PulseDesk v2.0</strong> — What Activity Monitor should have been if it was designed in 2026.
 </p>
 
 <p align="center">

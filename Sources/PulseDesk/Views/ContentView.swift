@@ -1,29 +1,80 @@
 import SwiftUI
 
+// MARK: - Sidebar Tabs
+
+enum SidebarSection: String {
+    case overview = "OVERVIEW"
+    case hardware = "HARDWARE"
+    case tools = "TOOLS"
+}
+
 enum SidebarTab: String, CaseIterable {
-    case dashboard = "Dashboard"
+    case home = "Home"
+    case cpu = "CPU"
+    case memory = "Memory"
+    case storage = "Storage"
+    case network = "Network"
+    case gpu = "GPU"
+    case thermal = "Thermal"
     case processes = "Processes"
     case booster = "Booster"
+    case widgets = "Widgets"
+    case settings = "Settings"
 
     var icon: String {
         switch self {
-        case .dashboard: return "square.grid.2x2"
+        case .home: return "house.fill"
+        case .cpu: return "cpu"
+        case .memory: return "memorychip"
+        case .storage: return "internaldrive"
+        case .network: return "network"
+        case .gpu: return "gpu"
+        case .thermal: return "thermometer.medium"
         case .processes: return "list.bullet.rectangle"
         case .booster: return "bolt.circle"
+        case .widgets: return "widget.small"
+        case .settings: return "gearshape"
         }
     }
 
     var shortcut: String {
         switch self {
-        case .dashboard: return "1"
-        case .processes: return "2"
-        case .booster: return "3"
+        case .home: return "1"
+        case .cpu: return "2"
+        case .memory: return "3"
+        case .storage: return "4"
+        case .network: return "5"
+        case .gpu: return "6"
+        case .thermal: return "7"
+        case .processes: return "8"
+        case .booster: return "9"
+        case .widgets: return "0"
+        case .settings: return ","
         }
+    }
+
+    var section: SidebarSection {
+        switch self {
+        case .home: return .overview
+        case .cpu, .memory, .storage, .network, .gpu, .thermal: return .hardware
+        case .processes, .booster, .widgets: return .tools
+        case .settings: return .tools
+        }
+    }
+
+    static var grouped: [(SidebarSection, [SidebarTab])] {
+        [
+            (.overview, [.home]),
+            (.hardware, [.cpu, .memory, .storage, .network, .gpu, .thermal]),
+            (.tools, [.processes, .booster, .widgets])
+        ]
     }
 }
 
+// MARK: - Content View
+
 struct ContentView: View {
-    @State private var selectedTab: SidebarTab = .dashboard
+    @State private var selectedTab: SidebarTab = .home
     @EnvironmentObject var metricsEngine: MetricsEngine
     @EnvironmentObject var processEngine: ProcessEngine
     @EnvironmentObject var actionEngine: ActionEngine
@@ -43,7 +94,6 @@ struct ContentView: View {
             }
             .background(backgroundGradient)
 
-            // Toast notifications overlay
             ToastOverlay()
         }
         .onReceive(NotificationCenter.default.publisher(for: .navigateToTab)) { notification in
@@ -63,7 +113,6 @@ struct ContentView: View {
 
     private var mainContent: some View {
         ZStack {
-            // Ambient glow behind content
             Circle()
                 .fill(accentGlow)
                 .frame(width: 500, height: 500)
@@ -73,12 +122,28 @@ struct ContentView: View {
 
             Group {
                 switch selectedTab {
-                case .dashboard:
-                    DashboardView()
+                case .home:
+                    HomeView(selectedTab: $selectedTab)
+                case .cpu:
+                    CPUDetailView()
+                case .memory:
+                    MemoryDetailView()
+                case .storage:
+                    StorageDetailView()
+                case .network:
+                    NetworkDetailView()
+                case .gpu:
+                    GPUDetailView()
+                case .thermal:
+                    ThermalDetailView()
                 case .processes:
                     ProcessListView()
                 case .booster:
                     BoosterView()
+                case .widgets:
+                    WidgetsManagerView()
+                case .settings:
+                    SettingsView()
                 }
             }
             .transition(.opacity.animation(.pulseGentle))
@@ -119,33 +184,64 @@ struct SidebarView: View {
         VStack(spacing: 0) {
             // Branding
             branding
-                .padding(.vertical, 18)
+                .padding(.vertical, 14)
 
             Divider().background(Color.borderSubtle)
 
             // Navigation
-            VStack(spacing: 2) {
-                ForEach(SidebarTab.allCases, id: \.self) { tab in
-                    SidebarButton(
-                        tab: tab,
-                        isSelected: selectedTab == tab,
-                        onTap: {
-                            withAnimation(.pulseSpring) {
-                                selectedTab = tab
+            ScrollView(.vertical, showsIndicators: false) {
+                VStack(spacing: 0) {
+                    ForEach(SidebarTab.grouped, id: \.0) { section, tabs in
+                        VStack(spacing: 2) {
+                            Text(section.rawValue)
+                                .font(.system(size: 9, weight: .bold))
+                                .foregroundStyle(Color.textTertiary)
+                                .tracking(0.8)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.horizontal, 14)
+                                .padding(.top, 12)
+                                .padding(.bottom, 4)
+
+                            ForEach(tabs, id: \.self) { tab in
+                                SidebarButton(
+                                    tab: tab,
+                                    isSelected: selectedTab == tab,
+                                    onTap: {
+                                        withAnimation(.pulseSpring) {
+                                            selectedTab = tab
+                                        }
+                                    }
+                                )
                             }
                         }
-                    )
+                    }
                 }
+                .padding(.horizontal, 10)
             }
-            .padding(.horizontal, 10)
-            .padding(.top, 10)
 
             Spacer()
+
+            // Settings button (always visible at bottom)
+            VStack(spacing: 0) {
+                Divider().background(Color.borderSubtle)
+
+                SidebarButton(
+                    tab: .settings,
+                    isSelected: selectedTab == .settings,
+                    onTap: {
+                        withAnimation(.pulseSpring) {
+                            selectedTab = .settings
+                        }
+                    }
+                )
+                .padding(.horizontal, 10)
+                .padding(.vertical, 4)
+            }
 
             // Live status strip
             liveStatus
                 .padding(.horizontal, 12)
-                .padding(.bottom, 8)
+                .padding(.bottom, 6)
 
             Divider().background(Color.borderSubtle)
 
@@ -158,9 +254,9 @@ struct SidebarView: View {
                     .font(.system(size: 9, weight: .medium, design: .monospaced))
                     .foregroundStyle(Color.textTertiary)
             }
-            .padding(.vertical, 8)
+            .padding(.vertical, 6)
         }
-        .frame(width: 170)
+        .frame(width: 180)
         .background(.ultraThinMaterial)
     }
 
@@ -176,14 +272,14 @@ struct SidebarView: View {
                     .foregroundStyle(Color.textPrimary)
             }
 
-            Text("System Monitor")
+            Text("v2.0 — System Monitor")
                 .font(.system(size: 9, weight: .medium))
                 .foregroundStyle(Color.textTertiary)
         }
     }
 
     private var liveStatus: some View {
-        VStack(spacing: 6) {
+        VStack(spacing: 5) {
             MiniStatusItem(
                 icon: "cpu",
                 label: "CPU",
@@ -197,8 +293,14 @@ struct SidebarView: View {
                 color: Color.forUsage(metrics.memory.usagePercent)
             )
             MiniStatusItem(
+                icon: "internaldrive",
+                label: "Disk",
+                value: String(format: "%.0f%%", metrics.disk.usagePercent),
+                color: Color.forUsage(metrics.disk.usagePercent)
+            )
+            MiniStatusItem(
                 icon: thermalEngine.thermalIcon,
-                label: "Thermal",
+                label: "Temp",
                 value: thermalEngine.thermal.thermalState.rawValue,
                 color: Color.forThermal(thermalEngine.thermal.thermalState)
             )
@@ -219,25 +321,25 @@ struct SidebarButton: View {
         Button { onTap() } label: {
             HStack(spacing: 9) {
                 Image(systemName: tab.icon)
-                    .font(.system(size: 13, weight: isSelected ? .semibold : .medium))
+                    .font(.system(size: 12, weight: isSelected ? .semibold : .medium))
                     .foregroundStyle(isSelected ? Color.pulseBlue : Color.textSecondary)
-                    .frame(width: 18)
+                    .frame(width: 16)
 
                 Text(tab.rawValue)
-                    .font(.system(size: 12, weight: isSelected ? .semibold : .medium))
+                    .font(.system(size: 11, weight: isSelected ? .semibold : .medium))
                     .foregroundStyle(isSelected ? Color.textPrimary : Color.textSecondary)
 
                 Spacer()
 
                 Text(tab.shortcut)
-                    .font(.system(size: 9, weight: .medium, design: .monospaced))
+                    .font(.system(size: 8, weight: .medium, design: .monospaced))
                     .foregroundStyle(Color.textTertiary)
                     .opacity(isHovered ? 1 : 0)
             }
             .padding(.horizontal, 10)
-            .padding(.vertical, 7)
+            .padding(.vertical, 6)
             .background(
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                RoundedRectangle(cornerRadius: 7, style: .continuous)
                     .fill(isSelected ? Color.pulseBlue.opacity(0.12) : isHovered ? Color.surfaceHover : Color.clear)
             )
         }
@@ -265,7 +367,7 @@ struct MiniStatusItem: View {
             Text(label)
                 .font(.system(size: 9, weight: .medium))
                 .foregroundStyle(Color.textTertiary)
-                .frame(width: 38, alignment: .leading)
+                .frame(width: 30, alignment: .leading)
 
             Spacer()
 
